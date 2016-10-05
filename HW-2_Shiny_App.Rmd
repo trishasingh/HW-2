@@ -1,6 +1,6 @@
 ---
 title: "MATH 216 Homework 2 Shiny App"
-author: "WRITE YOUR NAME HERE"
+author: "Trisha Singh"
 output: html_document
 runtime: shiny
 ---
@@ -19,29 +19,29 @@ library(ggplot2movies)
 You can embed Shiny inputs and outputs in your document. Outputs are automatically updated whenever inputs change.  This demonstrates how a standard R plot can be made interactive by wrapping it in the Shiny `renderPlot` function. The `selectInput` and `sliderInput` functions create the input widgets used to drive the plot.
 
 ```{r eruptions, echo=FALSE}
+
 inputPanel(
   
-  # Input name
-  textInput("name", label = "Enter Name:", value="Jane"),
-  # Input start year
-  numericInput("start_year", label = "Start Year:", value = 1880, min = 1880, max = 2014, step = 1),
-  # Input end year
-  numericInput("end_year", label = "End Year:", value = 2014, min = 1880, max = 2014, step = 1)
-  
+  radioButtons("genre", label = "Select movie genre",
+              choices = c("Action", "Animation", "Comedy", "Drama", 
+                          "Documentary", "Romance", "Short"))
 )
 
 renderPlot({
   
-  # Pretend Inputs
-  input_name <- "Albert"
-  input_start_year <- 1880
-  input_end_year <- 2014
+  movies_plot <- movies %>% 
+    select_("budget", "rating", input$genre) %>% 
+    rename_("type" = input$genre) %>% 
+    filter(type==1)
   
-  # Generate Plots
-  names <- babynames %>%
-    filter(name == input$name & year >= input$start_year & year <= input$end_year )
-  ggplot(data=names, aes(x=year, y=prop, col=sex)) + 
-    geom_line()
+  ggplot(movies_plot, aes(budget, rating)) + 
+    geom_point() + geom_smooth(se=F) +
+    theme(text = element_text(family="Verdana"), 
+          axis.text.x = element_text(angle = 45, hjust = 1), 
+          axis.text.y = element_text(face = "bold"), 
+          plot.title = element_text(size=20)) +
+  labs(title = "Relationship of Movie IMDB Rating with Budget", 
+       y = "IMDB Rating", x = "Budget")
   
 })
 ```
