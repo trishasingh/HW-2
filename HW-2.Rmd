@@ -75,7 +75,7 @@ p1 + theme(text = element_text(family="Verdana"),
                   axis.text.y = element_text(face = "bold"), 
                   plot.title = element_text(size=20)) +
   labs(title = "Income by Gender", 
-       y = "Number of People (M or F)", x = "Income")
+       y = "Proportion of Users (M or F)", x = "Income")
 
 #Relationship between gender and job 
 
