@@ -11,6 +11,7 @@ library(ggplot2)
 library(dplyr)
 library(babynames)
 library(ggplot2movies)
+library(ggthemes)
 ```
 
 
@@ -33,15 +34,19 @@ renderPlot({
     select_("budget", "rating", input$genre) %>% 
     rename_("type" = input$genre) %>% 
     filter(type==1)
+    
   
   ggplot(movies_plot, aes(budget, rating)) + 
-    geom_point() + geom_smooth(se=F) +
-    theme(text = element_text(family="Verdana"), 
-          axis.text.x = element_text(angle = 45, hjust = 1), 
-          axis.text.y = element_text(face = "bold"), 
-          plot.title = element_text(size=20)) +
-  labs(title = "Relationship of Movie IMDB Rating with Budget", 
-       y = "IMDB Rating", x = "Budget")
+    geom_point(alpha=0.5, colour = "darkslateblue", size = 2) + 
+    geom_smooth(se=F) +
+    theme_minimal() +
+    scale_x_log10() +
+     theme(text = element_text(family="Verdana"), 
+           axis.text.x = element_text(angle = 45, hjust = 1, face = "bold"), 
+           axis.text.y = element_text(face = "bold"), 
+           plot.title = element_text(size=20)) +
+  labs(title = "Relationship of Movie IMDB Rating with Budget",
+       y = "IMDB Rating", x = "Log10(Budget)")
   
 })
 ```

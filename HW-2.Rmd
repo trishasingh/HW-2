@@ -1,6 +1,6 @@
 ---
 title: "MATH 216 Homework 2"
-author: "WRITE YOUR NAME HERE"
+author: "Trisha Singh"
 output:
   html_document:
     toc: true
@@ -10,9 +10,12 @@ output:
 ---
 
 ```{r, echo=FALSE, message=FALSE}
+#libraries for part 1
 library(ggplot2)
 library(dplyr)
-library(readr) 
+library(readr)
+library(forcats)
+library(gridExtra)
 ```
 
 
@@ -49,9 +52,179 @@ specifically on the relationship between gender and
 all keeping in mind in HW-3, you will be fitting a logistic regression to
 predict a user's gender based on these variables.
 
-```{r, echo=TRUE, message=TRUE, warning=TRUE, fig.width=8, fig.height=4.5}
+```{r, echo=TRUE, message=TRUE, warning=TRUE, fig.width=8, fig.height=6}
+
+#Relationship between gender and income
+
+income_sex <- profiles %>% 
+  group_by(income, sex) %>% 
+  summarise(count = n()) %>%
+  mutate(income_count = sum(count)) %>% 
+  mutate(income_lab=paste(income, " (n = ", income_count, ")", sep=""))
+  
+
+# Creating barplot
+
+p1 <- ggplot(income_sex, aes(x=fct_reorder(income_lab, income), y=count, fill=sex)) + 
+  geom_bar(position="fill", stat="identity", colour = "black")
+  
+# Formatting barplot
+
+p1 + theme(text = element_text(family="Verdana"), 
+                  axis.text.x = element_text(angle=45, hjust = 1, face = "bold"), 
+                  axis.text.y = element_text(face = "bold"), 
+                  plot.title = element_text(size=20)) +
+  labs(title = "Income by Gender", 
+       y = "Number of People (M or F)", x = "Income")
+
+#Relationship between gender and job 
+
+# Plot 1: Number of Jobs by Sex
+
+job_sex_f <- profiles %>% 
+  filter(sex=="f") %>% 
+  group_by(job) %>% 
+  summarise(count = n())
+
+job_sex_m <- profiles %>% 
+  filter(sex=="m") %>% 
+  group_by(job) %>% 
+  summarise(count = n())
+
+# Creating barplots
+
+p2_f <- ggplot(job_sex_f, aes(x=fct_reorder(job, count), y=count)) +
+  geom_bar(stat="identity", colour = "black", fill = "cadetblue2")
+
+p2_m <- ggplot(job_sex_m, aes(x=fct_reorder(job, count), y=count)) +
+  geom_bar(stat="identity", colour = "black", fill = "cadetblue2")
+
+# Formatting the graphs
+
+p2_f <- p2_f + theme(text = element_text(family="Verdana"), 
+                  axis.text.x = element_text(angle = 55, hjust = 1), 
+                  axis.text.y = element_text(face = "bold"), 
+                  plot.title = element_text(size=20)) +
+  ylim(0,5000) +
+  labs(title = "Jobs of Female Users", 
+       y = "Number of Female Users", x = "Job")
+
+p2_m <- p2_m + theme(text = element_text(family="Verdana"), 
+                  axis.text.x = element_text(angle = 55, hjust = 1), 
+                  axis.text.y = element_text(face = "bold"), 
+                  plot.title = element_text(size=20)) +
+  ylim(0,5000) +
+  labs(title = "Jobs of Male Users", 
+       y = "Number of Male Users", x = "Job")
+
+grid.arrange(p2_f, p2_m, ncol=2)
+
+# Plot 2: Conditional Probability of being Male or Female Given Job
+
+job_sex <- profiles %>% 
+  group_by(job, sex) %>% 
+  summarise(count = n())
+
+job_sex$prob <- job_sex$count/sum(job_sex$count)
+
+prob_male <- length(which(profiles$sex=="m"))/length(profiles$sex)
+prob_female <- length(which(profiles$sex=="f"))/length(profiles$sex)
+
+job_sex <- job_sex %>% 
+  mutate(cond_prob = ifelse(sex=="m", prob/prob_male, prob/prob_female))
+
+# Creating bar plot
+
+p2 <- ggplot(job_sex, aes(x=fct_reorder(job, cond_prob, median), y=cond_prob, fill=sex)) +
+  geom_bar(stat="identity", position="dodge", colour = "black")
+
+# Formatting bar plot
+
+p2 + 
+  theme(text = element_text(family="Verdana"), 
+                  axis.text.x = element_text(angle = 55, hjust = 1), 
+                  axis.text.y = element_text(face = "bold"), 
+                  plot.title = element_text(size=20)) +
+    labs(title = "Conditional Probability of Being M or F Given Job", 
+       y = "Conditional Probability", x = "Job")
+
+# Relationship between sexual orientation and gender
+
+# Plot 1: Sexual Orientation by Sex
+
+orientation_sex_f <- profiles %>% 
+  filter(sex=="f") %>% 
+  group_by(orientation) %>% 
+  summarise(count = n())
+
+orientation_sex_m <- profiles %>% 
+  filter(sex=="m") %>% 
+  group_by(orientation) %>% 
+  summarise(count = n())
+
+# Creating barplots
+
+p3_f <- ggplot(orientation_sex_f, aes(x=orientation, y=count)) +
+  geom_bar(stat="identity", colour = "black", fill = "cadetblue2")
+
+p3_m <- ggplot(orientation_sex_m, aes(x=orientation, y=count)) +
+  geom_bar(stat="identity", colour = "black", fill = "cadetblue2")
+
+# Formatting the graphs
+
+p3_f <- p3_f + theme(text = element_text(family="Verdana"), 
+                  axis.text.x = element_text(angle = 55, hjust = 1), 
+                  axis.text.y = element_text(face = "bold"), 
+                  plot.title = element_text(size=20)) +
+  labs(title = "Orientation of Female Users", 
+       y = "Number of Female Users", x = "Orientation") +
+  ylim(0, 32000)
+
+p3_m <- p3_m + theme(text = element_text(family="Verdana"), 
+                  axis.text.x = element_text(angle = 55, hjust = 1), 
+                  axis.text.y = element_text(face = "bold"), 
+                  plot.title = element_text(size=20)) +
+  labs(title = "Orientation of Male Users", 
+       y = "Number of Male Users", x = "Orientation") +
+  ylim(0, 32000)
+
+grid.arrange(p3_f, p3_m, ncol=2)
+
+# Plot 2: Conditional Probability of being Male or Female Given Job
+
+orientation_sex <- profiles %>% 
+  group_by(orientation, sex) %>% 
+  summarise(count = n())
+
+orientation_sex$prob <- orientation_sex$count/sum(orientation_sex$count)
+
+orientation_sex <- orientation_sex %>% 
+  mutate(cond_prob = ifelse(sex=="m", prob/prob_male, prob/prob_female))
+
+# Creating bar plot
+
+p2 <- ggplot(orientation_sex, aes(x=fct_reorder(orientation, cond_prob, median), y=cond_prob, fill=sex)) +
+  geom_bar(stat="identity", position="dodge", colour = "black")
+
+# Formatting bar plot
+
+p2 + 
+  theme(text = element_text(family="Verdana"), 
+                  axis.text.x = element_text(angle = 55, hjust = 1), 
+                  axis.text.y = element_text(face = "bold"), 
+                  plot.title = element_text(size=20)) +
+    labs(title = "Conditional Probability of Being M or F Given Orientation", 
+       y = "Conditional Probability", x = "Orientation")
+
 
 ```
+
+**Issues**
+
+* NA values do not show up in my second graph of conditional probabilities, even though they exist in my data frame.
+
+* I couldn't figure out how to increase the distance between two dodged bars in the last graph, i.e. increase the distance between job or orientation bars.
+
 
 
 
