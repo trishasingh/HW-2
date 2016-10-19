@@ -123,15 +123,15 @@ grid.arrange(p2_f, p2_m, ncol=2)
 
 job_sex <- profiles %>% 
   group_by(job, sex) %>% 
-  summarise(count = n())
+  summarise(count = n()) %>% 
+  mutate(job_count = sum(count))
 
-job_sex$prob <- job_sex$count/sum(job_sex$count)
-
-prob_male <- length(which(profiles$sex=="m"))/length(profiles$sex)
-prob_female <- length(which(profiles$sex=="f"))/length(profiles$sex)
+# Calculating conditional probability of being male or female given job
+job_sex$prob_and <- job_sex$count/sum(job_sex$count) #Numerator
+job_sex$prob_job <- job_sex$job_count/((sum(job_sex$job_count))/2) #Denominator
 
 job_sex <- job_sex %>% 
-  mutate(cond_prob = ifelse(sex=="m", prob/prob_male, prob/prob_female))
+  mutate(cond_prob = prob_and/prob_job)
 
 # Creating bar plot
 
@@ -194,12 +194,15 @@ grid.arrange(p3_f, p3_m, ncol=2)
 
 orientation_sex <- profiles %>% 
   group_by(orientation, sex) %>% 
-  summarise(count = n())
+  summarise(count = n()) %>% 
+  mutate(orientation_count=sum(count))
 
-orientation_sex$prob <- orientation_sex$count/sum(orientation_sex$count)
+# Calculating conditional probability of being male or female given sexual orientation
+orientation_sex$prob_and <- orientation_sex$count/sum(orientation_sex$count) #Numerator
+orientation_sex$prob_job <- orientation_sex$orientation_count/((sum(orientation_sex$orientation_count))/2) #Denominator
 
 orientation_sex <- orientation_sex %>% 
-  mutate(cond_prob = ifelse(sex=="m", prob/prob_male, prob/prob_female))
+  mutate(cond_prob = prob_and/prob_job)
 
 # Creating bar plot
 
