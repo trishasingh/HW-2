@@ -32,10 +32,10 @@ profiles <- read_csv(file="profiles.csv")
 
 Please indicate
 
-* Who you collaborated with:
-* Roughly how much time you spent on this HW so far:
-* The URL of the RPubs published URL [here](https://www.nhl.com/).
-* What gave you the most trouble:
+* Who you collaborated with: Connor
+* Roughly how much time you spent on this HW so far: 2-3 hours
+* The URL of the RPubs published URL [here](http://rpubs.com/tsingh/hw2).
+* What gave you the most trouble: Trying to figure out the best way to present a brief description of the data. It always seems like too much or too little.
 * Any comments you have:
 
 
