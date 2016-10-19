@@ -52,7 +52,7 @@ specifically on the relationship between gender and
 all keeping in mind in HW-3, you will be fitting a logistic regression to
 predict a user's gender based on these variables.
 
-```{r, echo=TRUE, message=TRUE, warning=TRUE, fig.width=8, fig.height=6}
+```{r, echo=FALSE, message=TRUE, warning=TRUE, fig.width=8, fig.height=6}
 
 #Relationship between gender and income
 
@@ -223,8 +223,6 @@ p2 +
 ```
 
 **Issues**
-
-* NA values do not show up in my second graph of conditional probabilities, even though they exist in my data frame.
 
 * I couldn't figure out how to increase the distance between two dodged bars in the last graph, i.e. increase the distance between job or orientation bars.
 
