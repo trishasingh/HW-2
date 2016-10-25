@@ -56,18 +56,34 @@ predict a user's gender based on these variables.
 
 #Relationship between gender and income
 
+# Grouping income into intervals
+
+#For creating quartiles: profiles %>% filter(income!=-1) %>% summary(income)
+#For calculating proportion of male&female in profiles dataset:
+#profiles %>% group_by(sex) %>% summarise(count=n()) %>% mutate(prop=count/sum(count))
+
+
+profiles <- profiles %>% 
+  mutate(income_class = ifelse(income==-1, "Not Reported",
+                               ifelse(income>=0 & income <=20000, "Q1: 20,000 and below",
+                                      ifelse(income>20000 & income<=50000, "Q2: 20,000-50,000",
+                                             ifelse(income>50000 & income<=100000, "Q3: 50,000-100,000", 
+                                                    "Q4: 100,000 and above")))))
+
 income_sex <- profiles %>% 
-  group_by(income, sex) %>% 
+  group_by(income_class, sex) %>% 
   summarise(count = n()) %>%
   mutate(income_count = sum(count)) %>% 
-  mutate(income_lab=paste(income, " (n = ", income_count, ")", sep=""))
+  mutate(income_lab=paste(income_class, " (n = ", income_count, ")", sep=""))
   
 
 # Creating barplot
 
-p1 <- ggplot(income_sex, aes(x=fct_reorder(income_lab, income), y=count, fill=sex)) + 
-  geom_bar(position="fill", stat="identity", colour = "black")
-  
+p1 <- ggplot(income_sex, aes(x=income_lab, y=count, fill=sex)) + 
+  geom_bar(position="fill", stat="identity", colour = "black") +
+  geom_hline(yintercept = 0.4023121, color = "ghostwhite") +
+  annotate("text", label = "Proportion of women in profiles dataset", x = 4.2, y = 0.38, size = 5, colour = "ghostwhite")
+
 # Formatting barplot
 
 p1 + theme(text = element_text(family="Verdana"), 
@@ -78,6 +94,8 @@ p1 + theme(text = element_text(family="Verdana"),
        y = "Proportion of Users (M or F)", x = "Income")
 
 #Relationship between gender and job 
+
+jobs <- profiles %>% group_by(job) %>% summarise(n=n()) %>% mutate(prop=n/sum(n))
 
 # Plot 1: Number of Jobs by Sex
 
@@ -122,7 +140,19 @@ grid.arrange(p2_f, p2_m, ncol=2)
 # Plot 2: Conditional Probability of being Male or Female Given Job
 
 job_sex <- profiles %>% 
-  group_by(job, sex) %>% 
+  mutate(job_group = ifelse(job=="military"|job=="transportation"|job=="clerical / administrative"|job=="construction / craftsmanship"|job=="hospitality / travel"|job=="other", "Other",
+    ifelse(job=="political / government"|job=="law / legal services", "Politics/Law",
+           ifelse(job=="entertainment / media"|job=="artistic / musical / writer", "Art/Entertainment",
+                  ifelse(job=="computer / hardware / software"|job=="science / tech / engineering", "Science/Technology",
+                         ifelse(job=="retired"|job=="unemployed", "Not Working",
+                                ifelse(job=="student"|job=="education / academia", "Student/Academia",
+                                       ifelse(job=="rather not say", NA,
+                                              ifelse(job=="banking / financial / real estate", "Banking/Financial/Real Estate",
+                                                     ifelse(job=="executive / management"|job=="sales / marketing / biz dev",
+                                                            "Management/Sales",
+                                                            ifelse(job=="medicine / health", "Medicine/Health",
+                                job))))))))))) %>% 
+  group_by(job_group,sex) %>% 
   summarise(count = n()) %>% 
   mutate(job_count = sum(count))
 
@@ -135,8 +165,10 @@ job_sex <- job_sex %>%
 
 # Creating bar plot
 
-p2 <- ggplot(job_sex, aes(x=fct_reorder(job, cond_prob, median), y=cond_prob, fill=sex)) +
-  geom_bar(stat="identity", position="dodge", colour = "black")
+p2 <- ggplot(job_sex, aes(x=fct_reorder(job_group, cond_prob, median), y=cond_prob, fill=sex)) +
+  geom_bar(stat="identity", position="dodge", colour = "black") +
+  geom_hline(yintercept = 0.4023121, color = "ghostwhite") +
+  annotate("text", label = "Proportion of women in profiles dataset", x = 8, y = 0.38, size = 5, colour = "ghostwhite")
 
 # Formatting bar plot
 
@@ -207,7 +239,9 @@ orientation_sex <- orientation_sex %>%
 # Creating bar plot
 
 p2 <- ggplot(orientation_sex, aes(x=fct_reorder(orientation, cond_prob, median), y=cond_prob, fill=sex)) +
-  geom_bar(stat="identity", position="dodge", colour = "black")
+  geom_bar(stat="identity", position="dodge", colour = "black") +
+  geom_hline(yintercept = 0.4023121, color = "ghostwhite") +
+  annotate("text", label = "Proportion of women in profiles dataset", x = 2.7, y = 0.38, size = 5, colour = "ghostwhite")
 
 # Formatting bar plot
 
@@ -222,9 +256,6 @@ p2 +
 
 ```
 
-**Issues**
-
-* I couldn't figure out how to increase the distance between two dodged bars in the last graph, i.e. increase the distance between job or orientation bars.
 
 
 
